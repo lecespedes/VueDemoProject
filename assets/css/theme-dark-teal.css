@@ -1,0 +1,90 @@
+html.dark-teal-vela {
+  color-scheme: dark;
+  --el-color-primary: #26a69a;
+  --el-color-primary-light-3: #4db6ac;
+  --el-color-primary-light-5: #4db6ac;
+  --el-color-primary-light-7: #80cbc4;
+  --el-color-primary-light-8: #b2dfdb;
+  --el-color-primary-light-9: #e0f2f1;
+  --el-color-primary-dark-2: #00897b;
+  --el-color-success: #66bb6a;
+  --el-color-success-light-3: #81c784;
+  --el-color-success-light-5: #a5d6a7;
+  --el-color-success-light-7: #c8e6c9;
+  --el-color-success-light-8: #e8f5e9;
+  --el-color-success-light-9: #f1f8e9;
+  --el-color-success-dark-2: #4caf50;
+  --el-color-warning: #ffca28;
+  --el-color-warning-light-3: #ffd54f;
+  --el-color-warning-light-5: #ffe082;
+  --el-color-warning-light-7: #ffecb3;
+  --el-color-warning-light-8: #fff8e1;
+  --el-color-warning-light-9: #fffde7;
+  --el-color-warning-dark-2: #ffb300;
+  --el-color-danger: #ef5350;
+  --el-color-danger-light-3: #e57373;
+  --el-color-danger-light-5: #ef9a9a;
+  --el-color-danger-light-7: #ffcdd2;
+  --el-color-danger-light-8: #ffebee;
+  --el-color-danger-light-9: #fff1f0;
+  --el-color-danger-dark-2: #d81b60;
+  --el-color-error: #ef5350;
+  --el-color-error-light-3: #e57373;
+  --el-color-error-light-5: #ef9a9a;
+  --el-color-error-light-7: #ffcdd2;
+  --el-color-error-light-8: #ffebee;
+  --el-color-error-light-9: #fff1f0;
+  --el-color-error-dark-2: #d81b60;
+  --el-color-info: #78909c;
+  --el-color-info-light-3: #90a4ae;
+  --el-color-info-light-5: #b0bec5;
+  --el-color-info-light-7: #cfd8dc;
+  --el-color-info-light-8: #eceff1;
+  --el-color-info-light-9: #f5f7fa;
+  --el-color-info-dark-2: #546e7a;
+  --el-bg-color-page: #0d0d0d;
+  --el-bg-color: #121212;
+  --el-bg-color-overlay: #1a1a1a;
+  --el-text-color-primary: #b2dfdb;
+  --el-text-color-regular: #80cbc4;
+  --el-text-color-secondary: #4dd0e1;
+  --el-text-color-placeholder: #4db6ac;
+  --el-text-color-disabled: #26a69a;
+  --el-border-color-darker: #263238;
+  --el-border-color-dark: #2e4053;
+  --el-border-color: #37474f;
+  --el-border-color-light: #455a64;
+  --el-border-color-lighter: #546e7a;
+  --el-border-color-extra-light: #607d8b;
+  --el-fill-color-darker: #1c2526;
+  --el-fill-color-dark: #212f30;
+  --el-fill-color: #263238;
+  --el-fill-color-light: #2e4053;
+  --el-fill-color-lighter: #37474f;
+  --el-fill-color-extra-light: #455a64;
+  --el-fill-color-blank: transparent;
+  --el-mask-color: rgba(0, 0, 0, 0.8);
+  --el-mask-color-extra-light: rgba(0, 0, 0, 0.3);
+  --el-box-shadow: 0px 12px 32px 4px rgba(0, 0, 0, 0.36), 0px 8px 20px rgba(0, 0, 0, 0.72);
+  --el-box-shadow-light: 0px 0px 12px rgba(0, 0, 0, 0.72);
+  --el-box-shadow-lighter: 0px 0px 6px rgba(0, 0, 0, 0.72);
+  --el-box-shadow-dark: 0px 16px 48px 16px rgba(0, 0, 0, 0.72), 0px 12px 32px #000000, 0px 8px 16px -8px #000000;
+}
+html.dark-teal-vela .el-button {
+  --el-button-disabled-text-color: rgba(255, 255, 255, 0.5);
+}
+html.dark-teal-vela .el-card {
+  --el-card-bg-color: var(--el-bg-color-overlay);
+}
+html.dark-teal-vela .el-empty {
+  --el-empty-fill-color-0: #000000;
+  --el-empty-fill-color-1: #1c2526;
+  --el-empty-fill-color-2: #212f30;
+  --el-empty-fill-color-3: #263238;
+  --el-empty-fill-color-4: #2e4053;
+  --el-empty-fill-color-5: #37474f;
+  --el-empty-fill-color-6: #455a64;
+  --el-empty-fill-color-7: #546e7a;
+  --el-empty-fill-color-8: #607d8b;
+  --el-empty-fill-color-9: #78909c;
+}

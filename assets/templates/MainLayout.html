@@ -1,0 +1,14 @@
+<div class="page-container">
+  <pagepart-header></pagepart-header>
+  <pagepart-nav-menu></pagepart-nav-menu>
+  <main
+    :style="{
+      minHeight: scrollable ? 'calc(100vh - 120px)' : 'auto',
+      overflow: scrollable ? 'auto' : 'visible',
+      padding: '20px'
+    }"
+  >
+    <slot name="content"></slot>
+  </main>
+  <pagepart-footer></pagepart-footer>
+</div>
