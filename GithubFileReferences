@@ -1,0 +1,33 @@
+
+Assets{        
+        Components
+        https://github.com/lecespedes/VueDemoProject/blob/main/assets/components/DatePicker.js
+        https://github.com/lecespedes/VueDemoProject/blob/main/assets/components/FormPanel.js
+        https://github.com/lecespedes/VueDemoProject/blob/main/assets/components/TextInput.js
+        https://github.com/lecespedes/VueDemoProject/blob/main/assets/components/TransferList.js
+
+        CSS
+        https://github.com/lecespedes/VueDemoProject/blob/main/assets/css/theme-css
+        https://github.com/lecespedes/VueDemoProject/blob/main/assets/css/theme-dark-blue.css
+        https://github.com/lecespedes/VueDemoProject/blob/main/assets/css/theme-dark-teal.css
+
+        layouts
+        https://github.com/lecespedes/VueDemoProject/blob/main/assets/layouts/MainLayout.js
+
+        pagparts
+        https://github.com/lecespedes/VueDemoProject/blob/main/assets/pageparts/Footer.js
+        https://github.com/lecespedes/VueDemoProject/blob/main/assets/pageparts/Header.js
+        https://github.com/lecespedes/VueDemoProject/blob/main/assets/pageparts/NavMenu.js
+
+        pages
+        https://github.com/lecespedes/VueDemoProject/blob/main/assets/pages/bootstrap-components.js
+        https://github.com/lecespedes/VueDemoProject/blob/main/assets/pages/bootstrap-dashboard.js
+        https://github.com/lecespedes/VueDemoProject/blob/main/assets/pages/elementsplus-all.js
+        https://github.com/lecespedes/VueDemoProject/blob/main/assets/pages/elementsplus-panel.js
+
+        templates
+        https://github.com/lecespedes/VueDemoProject/blob/main/assets/templates/MainLayout.html
+
+https://github.com/lecespedes/VueDemoProject/blob/main/assets/app.js
+}
+https://github.com/lecespedes/VueDemoProject/blob/main/bootstrap-components.html
