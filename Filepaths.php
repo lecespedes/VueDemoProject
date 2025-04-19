@@ -102,6 +102,8 @@ function generateDirectoryPaths($rootOverride = null, $exclude = []) {
             error_log("JSON encoding error: $errorMsg");
             throw new Exception("JSON encoding failed: $errorMsg");
         }
+        $jsonFile = __DIR__ . '/directory-structure.json';
+        file_put_contents($jsonFile, $jsonOutput);
         echo $jsonOutput;
     } catch (Exception $e) {
         header('Content-Type: application/json');
