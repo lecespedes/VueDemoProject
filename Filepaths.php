@@ -11,10 +11,10 @@ $exclude = ['.git/', 'BootstrapVueNext/', 'DashboardTemplates/', 'Filepaths.php'
 
 //$root= 'https://raw.githubusercontent.com/lecespedes/VueDemoProject/main';
 
-$root='https://raw.githubusercontent.com/lecespedes/VueDemoProject/refs/heads/main/';
+//$root='https://raw.githubusercontent.com/lecespedes/VueDemoProject/refs/heads/main/';
 
 // Run the function with optional root override and exclude array
-generateDirectoryPaths($root, $exclude); // Example: override to 'CustomRoot', exclude .git and script
+generateDirectoryPaths(null, $exclude); // Example: override to 'CustomRoot', exclude .git and script
 // generateDirectoryPaths(); // Default: uses basename(__DIR__), no exclusions
 // generateDirectoryPaths(null, ['.git/']); // Default root, exclude .git
 

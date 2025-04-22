@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub File Utility</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+        }
+        pre {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        #loading {
+            font-style: italic;
+            color: #666;
+        }
+        #load-files-directory, #load-code, #clear-cache, .tab-button {
+            margin: 0;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #load-files-directory:hover, #load-code:hover, #clear-cache:hover, .tab-button:hover {
+            background-color: #0056b3;
+        }
+        #filter-checkbox-label, #full-paths-label {
+            font-size: 16px;
+            display: inline-block;
+            padding: 5px;
+        }
+        .tab-control {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 10px;
+        }
+        .tab-group {
+            display: flex;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #e0e0e0;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            margin-right: 5px;
+            border-radius: 5px 5px 0 0;
+        }
+        .tab.active {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+        }
+        .tab:hover {
+            background-color: #d0d0d0;
+        }
+        .tab.active:hover {
+            background-color: #0056b3;
+        }
+        #rate-limit-info {
+            font-size: 14px;
+            color: #333;
+            margin-left: 10px;
+            white-space: nowrap;
+        }
+        .output-panel {
+            display: none;
+        }
+        .output-panel.active {
+            display: block;
+        }
+        /* removed: info styling */
+        #result {
+            white-space: pre-line;
+            font-size: 16px;
+            color: #333;
+            text-align: center;
+            margin: 10px 0;
+        }
+        .tab-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .page-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .controls-wrapper {
+            display: block;
+            margin: 0 auto;
+            text-align: center;
+            position: relative;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            max-width: fit-content;
+            margin: 0 auto 20px;
+            padding: 15px;
+            border: 2px inset #ccc;
+            gap: 10px;
+        }
+        .control-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+        .code-info, .file-list-info, .directory-structure-info, .cache-info {
+            font-size: 16px;
+            color: #333;
+            text-align: left;
+            margin: 0;
+            line-height: 36px;
+        }
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        #cache-message {
+            font-size: 16px;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            top: -30px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <h1>GitHub File Utility</h1>
+        <div class="controls-wrapper">
+            <div id="cache-message" class="success">Cache cleared!</div>
+            <div class="controls">
+                <div class="control-row">
+                    <button id="load-files-directory">Load Files & Directory</button>
+                    <button id="load-code">Load Code</button>
+                    <button id="clear-cache">Clear Cache</button>
+                </div>
+                <div class="control-row">
+                    <label id="filter-checkbox-label">
+                        <input type="checkbox" id="filter-extensions"> Filter files(<span id="filter-types"></span>)
+                    </label>
+                    <label id="full-paths-label">
+                        <input type="checkbox" id="full-paths" checked> Full Paths
+                    </label>
+                </div>
+            </div>
+        </div>
+        <!-- removed: info div -->
+        <div id="loading" style="display: none;">Loading...</div>
+        <div id="error"></div>
+        <div id="result"></div>
+        <div class="tab-control">
+            <div class="tab-group">
+                <div class="tab active" data-tab="file-list">File List</div>
+                <div class="tab" data-tab="directory-structure">Directory Structure</div>
+                <div class="tab" data-tab="code">Code</div>
+                <div class="tab" data-tab="cache">Cache</div>
+            </div>
+            <span id="rate-limit-info"></span>
+        </div>
+        <div id="file-list-panel" class="output-panel active">
+            <div class="panel-header">
+                <div class="file-list-info"></div>
+                <div class="tab-buttons">
+                    <button class="tab-button" onclick="copyPathsToClipboard('file-list-output')">Copy Paths</button>
+                    <button class="tab-button" onclick="savePathsAsJson('file-list-output')">Save as JSON</button>
+                </div>
+            </div>
+            <pre id="file-list-output"></pre>
+        </div>
+        <div id="directory-structure-panel" class="output-panel">
+            <div class="panel-header">
+                <!-- added: excluded-paths in directory-structure-info -->
+                <div class="directory-structure-info">Excluded Paths: <span id="excluded-paths"></span></div>
+                <div class="tab-buttons">
+                    <button class="tab-button" onclick="copyPathsToClipboard('directory-structure-output')">Copy Paths</button>
+                    <button class="tab-button" onclick="savePathsAsJson('directory-structure-output')">Save as JSON</button>
+                </div>
+            </div>
+            <pre id="directory-structure-output"></pre>
+        </div>
+        <div id="code-panel" class="output-panel">
+            <div class="panel-header">
+                <div class="code-info">Included File Types: <span id="include-types"></span></div>
+                <div class="tab-buttons">
+                    <button class="tab-button" onclick="copyPathsToClipboard('code-output')">Copy</button>
+                </div>
+            </div>
+            <pre id="code-output"></pre>
+        </div>
+        <div id="cache-panel" class="output-panel">
+            <div class="panel-header">
+                <div class="cache-info"><span id="cache-summary"></span></div>
+                <div class="tab-buttons"></div>
+            </div>
+            <pre id="cache-output"></pre>
+        </div>
+    </div>
+
+    <script>
+        const OWNER = 'lecespedes';
+        const REPO = 'VueDemoProject';
+        const BRANCH = 'main';
+        const API_BASE = 'https://api.github.com';
+        const FILE_PATH = 'assets/layouts/MainLayout.js';
+        const HEADERS = {
+            'Accept': 'application/vnd.github.v3+json',
+            'User-Agent': 'VueDemoProject-Path-Script/1.0 (https://github.com/lecespedes/VueDemoProject)'
+        };
+
+        const EXCLUDE = [
+            '.git/',
+            'BootstrapVueNext/',
+            'DashboardTemplates/',
+            'Filepaths.php',
+            '.gitignore',
+            'favicon.ico'
+        ];
+        const CustomRoot = 'VueDemoProject';
+        let fullPaths = true;
+
+        const include = ['.html'];
+        const extensionsToFilter = ['.md', '.jpg', '.png', '.svg'];
+        let rateLimitRemaining = 'N/A';
+        let rateLimitResetDate = 'N/A';
+
+        const filterElement = document.getElementById('filter-types');
+        filterElement.textContent = extensionsToFilter.join(', ');
+
+        const includeElement = document.getElementById('include-types');
+        includeElement.textContent = include.join(', ');
+
+        const fileListOutputElement = document.getElementById('file-list-output');
+        fileListOutputElement.textContent = 'Click <Load Files & Directory> to load the data.';
+
+        const directoryOutputElement = document.getElementById('directory-structure-output');
+        directoryOutputElement.textContent = 'Click <Load Files & Directory> to load the data.';
+
+        const codeOutputElement = document.getElementById('code-output');
+        codeOutputElement.textContent = 'Click <Load Code> to load the data.';
+
+        const loadingElement = document.getElementById('loading');
+        const errorElement = document.getElementById('error');
+
+        /* removed: infoElement */
+        const excludedPathsElement = document.getElementById('excluded-paths');
+        excludedPathsElement.textContent = EXCLUDE.join(', ');
+
+        const tabs = document.querySelectorAll('.tab');
+        const panels = document.querySelectorAll('.output-panel');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                panels.forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(`${tabId}-panel`).classList.add('active');
+            });
+        });
+
+        const fullPathsCheckbox = document.getElementById('full-paths');
+        fullPathsCheckbox.addEventListener('change', () => {
+            fullPaths = fullPathsCheckbox.checked;
+        });
+
+        updateCacheStatus();
+
+        // Event listeners
+        document.getElementById('load-files-directory').addEventListener('click', DisplayPathsAndDirectory);
+        document.getElementById('load-code').addEventListener('click', DisplayFileContent);
+        document.getElementById('clear-cache').addEventListener('click', clearCache);
+
+        function getCache(key) {
+            const item = localStorage.getItem(key);
+            return item ? JSON.parse(item) : null;
+        }
+
+        function setCache(key, value) {
+            localStorage.setItem(key, JSON.stringify(value));
+        }
+
+        function clearCache() {
+            Object.keys(localStorage).forEach(key => {
+                if (key.startsWith('GitPath') || key.startsWith('GitFiles:')) {
+                    localStorage.removeItem(key);
+                }
+            });
+            updateCacheStatus();
+            const cacheMessageElement = document.getElementById('cache-message');
+            cacheMessageElement.style.display = 'block';
+            setTimeout(() => {
+                cacheMessageElement.style.display = 'none';
+            }, 3000);
+        }
+
+        function updateCacheStatus() {
+            const cacheOutputElement = document.getElementById('cache-output');
+            const cacheSummaryElement = document.getElementById('cache-summary');
+            const paths = getCache('GitPath');
+            const fileKeys = Object.keys(localStorage).filter(key => key.startsWith('GitFiles:'));
+            let totalSize = 0;
+            if (paths) {
+                totalSize += JSON.stringify(paths).length;
+            }
+            fileKeys.forEach(key => {
+                const item = getCache(key);
+                if (item && item.content) {
+                    totalSize += JSON.stringify(item).length;
+                }
+            });
+            cacheSummaryElement.textContent = `Cached: ${paths ? paths.length : 0} paths, ${fileKeys.length} files, ${totalSize} bytes`;
+            const output = [
+                'Cached Paths:',
+                paths ? JSON.stringify(paths, null, 2) : 'None',
+                '',
+                'Cached Files:',
+                fileKeys.length > 0 ? fileKeys.map(key => key.replace('GitFiles:', '')).join('\n') : 'None'
+            ];
+            cacheOutputElement.textContent = output.join('\n');
+        }
+
+        async function fetchFileContent(path) {
+            const cacheKey = `GitFiles:${path}`;
+            const cached = getCache(cacheKey);
+            if (cached) {
+                return cached.content;
+            }
+            try {
+                const contentUrl = `${API_BASE}/repos/${OWNER}/${REPO}/contents/${path}?ref=${BRANCH}`;
+                const response = await fetch(contentUrl, { headers: HEADERS });
+                rateLimitRemaining = parseInt(response.headers.get('X-RateLimit-Remaining') || '60');
+                rateLimitResetDate = parseInt(response.headers.get('X-RateLimit-Reset') || '0') ? 
+                    new Date(parseInt(response.headers.get('X-RateLimit-Reset') || '0') * 1000).toLocaleString() : 'unknown';
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    const message = errorData.message || 'Unknown';
+                    if (response.status === 404) {
+                        return `Error in Function fetchFileContent: File not found: ${path}`;
+                    } else if (response.status === 403 && message.includes('rate limit exceeded')) {
+                        const ip = message.match(/for (\d+\.\d+\.\d+\.\d+)/)?.[1] || 'unknown';
+                        return `Error in Function fetchFileContent: Rate limit exceeded for IP ${ip}. Reset at ${rateLimitResetDate}. Try disabling VPN/proxy.`;
+                    }
+                    return `Error in Function fetchFileContent: Failed to fetch file: ${response.status} ${response.statusText}. Message: ${message}`;
+                }
+
+                const data = await response.json();
+                const content = atob(data.content);
+                setCache(cacheKey, { content, timestamp: Date.now() });
+                return content;
+            } catch (error) {
+                return `Error in Function fetchFileContent: ${error.message}`;
+            }
+        }
+
+        async function DisplayFileContent() {
+            try {
+                codeOutputElement.textContent = '';
+                errorElement.textContent = '';
+                loadingElement.style.display = 'block';
+
+                const result = await fetchFilePaths(document.getElementById('filter-extensions').checked);
+                let paths;
+                if (Array.isArray(result)) {
+                    paths = result;
+                } else {
+                    paths = result.paths;
+                }
+
+                const filteredPaths = paths.filter(path => include.some(ext => path.toLowerCase().endsWith(ext)));
+                const output = [];
+                const errors = [];
+
+                for (let i = 0; i < filteredPaths.length; i++) {
+                    const path = filteredPaths[i];
+                    loadingElement.textContent = `Fetching file ${i + 1} of ${filteredPaths.length}`;
+                    const content = await fetchFileContent(path);
+                    output.push(`********** ${path} **********\n${content}\n---`);
+                    if (content.startsWith('Error')) {
+                        errors.push(`Error fetching ${path}: ${content}`);
+                    }
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+
+                codeOutputElement.textContent = output.join('\n');
+                if (errors.length > 0) {
+                    errorElement.textContent = errors.join('\n');
+                }
+                loadingElement.textContent = 'Loading...';
+                loadingElement.style.display = 'none';
+                updateCacheStatus();
+                const rateLimitElement = document.getElementById('rate-limit-info');
+                rateLimitElement.textContent = `Rate limit: ${rateLimitRemaining} until ${rateLimitResetDate}`;
+                const resultElement = document.getElementById('result');
+                resultElement.textContent = `${filteredPaths.length} items loaded. ${errors.length} items failed.`;
+            } catch (error) {
+                const errorMessage = `Error in Function DisplayFileContent: ${error.message}`;
+                codeOutputElement.textContent = errorMessage;
+                errorElement.textContent = errorMessage;
+                loadingElement.style.display = 'none';
+            }
+        }
+
+        function buildJsonStructure(paths, customRoot = null) {
+            const root = [];
+            paths.forEach((path, index) => {
+                const segments = path.split('/');
+                let current = root;
+                for (let i = 0; i < segments.length - 1; i++) {
+                    const segment = segments[i];
+                    let dirObj = current.find(item => typeof item === 'object' && Object.keys(item)[0] === segment);
+                    if (!dirObj) {
+                        dirObj = { [segment]: [] };
+                        current.push(dirObj);
+                    }
+                    current = dirObj[segment];
+                }
+                const fileName = segments[segments.length - 1];
+                const filePath = fullPaths && customRoot ? `${customRoot}/${path}` : fileName;
+                current.push(filePath);
+            });
+
+            function sortStructure(node) {
+                if (!Array.isArray(node)) return node;
+                const dirs = node.filter(item => typeof item === 'object');
+                const files = node.filter(item => typeof item === 'string');
+                dirs.sort((a, b) => Object.keys(a)[0].localeCompare(Object.keys(b)[0]));
+                files.sort();
+                for (const dir of dirs) {
+                    const key = Object.keys(dir)[0];
+                    dir[key] = sortStructure(dir[key]);
+                }
+                return [...dirs, ...files];
+            }
+
+            const sorted = sortStructure(root);
+            return { [customRoot || CustomRoot]: sorted };
+        }
+
+        async function DisplayDirectory(paths) {
+            try {
+                directoryOutputElement.textContent = '';
+                errorElement.textContent = '';
+
+                const structure = buildJsonStructure(paths, CustomRoot);
+                directoryOutputElement.textContent = JSON.stringify(structure, null, 2);
+            } catch (error) {
+                const errorMessage = `Error in Function DisplayDirectory: ${error.message}`;
+                directoryOutputElement.textContent = errorMessage;
+                errorElement.textContent = errorMessage;
+            }
+        }
+
+        async function fetchFilePaths(filterExtensions) {
+            const cacheKey = 'GitPath';
+            const cached = getCache(cacheKey);
+            let treeData;
+
+            if (cached) {
+                treeData = { tree: cached.map(path => ({ type: 'blob', path })) };
+            } else {
+                try {
+                    const treeUrl = `${API_BASE}/repos/${OWNER}/${REPO}/git/trees/${BRANCH}?recursive=1`;
+                    const treeResponse = await fetch(treeUrl, { headers: HEADERS });
+                    rateLimitRemaining = parseInt(treeResponse.headers.get('X-RateLimit-Remaining') || '60');
+                    rateLimitResetDate = parseInt(treeResponse.headers.get('X-RateLimit-Reset') || '0') ? 
+                        new Date(parseInt(treeResponse.headers.get('X-RateLimit-Reset') || '0') * 1000).toLocaleString() : 'unknown';
+
+                    if (!treeResponse.ok) {
+                        const errorData = await treeResponse.json().catch(() => ({}));
+                        const message = errorData.message || 'Unknown';
+                        if (treeResponse.status === 403 && message.includes('rate limit exceeded')) {
+                            const ip = message.match(/for (\d+\.\d+\.\d+\.\d+)/)?.[1] || 'unknown';
+                            return [`Error in Function FileFetchPaths: Rate limit exceeded for IP ${ip}. Reset at ${rateLimitResetDate}. Try disabling VPN/proxy.`];
+                        }
+                        return [`Error in Function FileFetchPaths: Tree fetch error: ${treeResponse.status} ${treeResponse.statusText}. Message: ${message}`];
+                    }
+
+                    treeData = await treeResponse.json();
+                    const rawPaths = treeData.tree
+                        .filter(item => item.type === 'blob')
+                        .map(item => item.path);
+                    setCache(cacheKey, rawPaths);
+                } catch (error) {
+                    return [`Error in Function FileFetchPaths: ${error.message}`];
+                }
+            }
+
+            let paths = treeData.tree
+                .filter(item => item.type === 'blob')
+                .map(item => item.path)
+                .filter(path => !EXCLUDE.some(exclude => path === exclude || path.startsWith(exclude)))
+                .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+
+            const unfilteredCount = paths.length;
+            if (filterExtensions) {
+                paths = paths.filter(path => !extensionsToFilter.some(ext => path.toLowerCase().endsWith(ext)));
+            }
+
+            return { paths, unfilteredCount };
+        }
+
+        async function DisplayFilePaths(paths) {
+            try {
+                fileListOutputElement.textContent = '';
+                errorElement.textContent = '';
+
+                fileListOutputElement.textContent = JSON.stringify(paths, null, 2);
+            } catch (error) {
+                const errorMessage = `Error in Function DisplayFilePaths: ${error.message}`;
+                fileListOutputElement.textContent = errorMessage;
+                errorElement.textContent = errorMessage;
+            }
+        }
+
+        async function DisplayPathsAndDirectory() {
+            try {
+                loadingElement.style.display = 'block';
+                errorElement.textContent = '';
+
+                const filterCheckbox = document.getElementById('filter-extensions');
+                const filterExtensions = filterCheckbox.checked;
+                const result = await fetchFilePaths(filterExtensions);
+                let paths;
+
+                if (Array.isArray(result)) {
+                    paths = result;
+                    await DisplayFilePaths(paths);
+                    await DisplayDirectory(paths);
+                } else {
+                    paths = result.paths;
+                    await DisplayFilePaths(paths);
+                    await DisplayDirectory(paths);
+                    const rateLimitElement = document.getElementById('rate-limit-info');
+                    rateLimitElement.textContent = `Rate limit: ${rateLimitRemaining} until ${rateLimitResetDate}`;
+                    const resultElement = document.getElementById('result');
+                    const filteredOutCount = result.unfilteredCount - paths.length;
+                    resultElement.textContent = `${paths.length} items returned. ${filteredOutCount} items filtered out.`;
+                }
+                updateCacheStatus();
+            } catch (error) {
+                const errorMessage = `Error in Function DisplayPathsAndDirectory: ${error.message}`;
+                errorElement.textContent = errorMessage;
+            } finally {
+                loadingElement.style.display = 'none';
+            }
+        }
+
+        async function copyPathsToClipboard(elementId) {
+            const outputElement = document.getElementById(elementId);
+            try {
+                await navigator.clipboard.writeText(outputElement.textContent);
+                errorElement.className = 'success';
+                errorElement.textContent = elementId === 'code-output' ? 'Code copied to clipboard!' : 'Paths copied to clipboard!';
+                setTimeout(() => {
+                    errorElement.textContent = '';
+                    errorElement.className = '';
+                }, 3000);
+            } catch (error) {
+                errorElement.className = 'error';
+                errorElement.textContent = `Error copying to clipboard: ${error.message}`;
+            }
+        }
+
+        function savePathsAsJson(elementId) {
+            const outputElement = document.getElementById(elementId);
+            const text = outputElement.textContent;
+
+            if (!text || text === 'Click <Load Files & Directory> to load the data.') {
+                errorElement.textContent = 'Error: No paths to save.';
+                return;
+            }
+
+            const blob = new Blob([text], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${elementId}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            errorElement.className = 'success';
+            errorElement.textContent = 'Paths saved as JSON!';
+            setTimeout(() => {
+                errorElement.textContent = '';
+                errorElement.className = '';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
